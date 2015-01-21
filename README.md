@@ -3,34 +3,33 @@ Using active annotations, the following code is converted automagically into a E
 
 ## Example:
 
-	@XPackage("http://mypkg/uri")
-	class MyPackage {}
+```Xtend
+@XMF abstract class NamedEntity {
+
+	@ID	String name
 	
-	@XMF abstract class NamedEntity {
-	
-		@ID	String name
-		
-		@Invariant("name must be smaller than 10 characters")
-		def nameSizeConstraint() {
-			name.length < 10
-		}
-		
-		@Invariant("name cannot be empty")
-		def nameNotEmpty() {
-			! name.empty
-		}
+	@Invariant("name must be smaller than 10 characters")
+	def nameSizeConstraint() {
+		name.length < 10
 	}
 	
-	@XMF class User extends NamedEntity {
-		@Attribute List<String> phones = emptyList
-		@Opposite("users") Group group
-		@Containment Account userAccount
+	@Invariant("name cannot be empty")
+	def nameNotEmpty() {
+		! name.empty
 	}
-	
-	@XMF class Group extends NamedEntity {
-		@Containment List<User> users
-	}
-	
-	@XMF class Account {
-		@Attribute int salary = 0
-	}
+}
+
+@XMF class User extends NamedEntity {
+	@Attribute List<String> phones = emptyList
+	@Opposite("users") Group group
+	@Containment Account userAccount
+}
+
+@XMF class Group extends NamedEntity {
+	@Containment List<User> users
+}
+
+@XMF class Account {
+	@Attribute int salary = 0
+}
+```
