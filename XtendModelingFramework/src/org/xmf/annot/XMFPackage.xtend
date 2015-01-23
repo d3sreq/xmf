@@ -35,15 +35,17 @@ class XmfPackageCompilationParticipant implements
 	}
 	
 	override doTransform(List<? extends MutableClassDeclaration> classes, extension TransformationContext context) {
-		val XPackageType = XMFPackage.findTypeGlobally
+		
+		// move @XMFPackage to the generated *Package class
+		val XMFPackageType = XMFPackage.findTypeGlobally
 		for(cls: classes) {
-			val clsAnnot = cls.findAnnotation(XPackageType)
+			val clsAnnot = cls.findAnnotation(XMFPackageType)
 			val pkgClass = cls.modelPackageName.findClass
-			val foundPkgAnnot = pkgClass.findAnnotation(XPackageType)
+			val foundPkgAnnot = pkgClass.findAnnotation(XMFPackageType)
 			if(foundPkgAnnot == null) {
 				pkgClass.addAnnotation(clsAnnot)
 			} else {
-				cls.addError('''Multiple @«XPackageType.simpleName» declaration in this Java/Xtend package''')
+				cls.addError('''Multiple @«XMFPackageType.simpleName» declaration in this Java/Xtend package''')
 			}
 		}
 	}
