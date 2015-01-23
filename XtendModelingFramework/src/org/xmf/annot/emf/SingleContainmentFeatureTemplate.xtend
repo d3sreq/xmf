@@ -11,7 +11,6 @@ class SingleContainmentFeatureTemplate extends AbstractFeatureTemplate {
 		super(featureRelatedMember, context)
 	}
 	
-	// TODO: same as SingleAttributeFeatureTemplate
 	override getBodyOfGetter() '''
 		return «featureVarName»;
 	'''
@@ -47,13 +46,11 @@ class SingleContainmentFeatureTemplate extends AbstractFeatureTemplate {
 		return;
 	'''
 
-	// TODO: same as SingleReferenceFeature
 	override getCaseBodyForEUnset() '''
 		«setterName»((«featureType»)null);
 		return;
 	'''
 	
-	// TODO: same as SingleReferenceFeature
 	override getCaseBodyForEIsSet() '''
 		return «featureVarName» != null;
 	'''

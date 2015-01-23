@@ -142,14 +142,13 @@ class ModelPackageTransformation {
 				// Create type parameters
 				
 				// Set bounds for type parameters
+				«/* TODO:Add supertypes to classes */»
 				
-				// Add supertypes to classes
-				// TODO
 				
 				// Initialize classes and features; add operations and parameters
 				«FOR cls : classes»
 					initEClass(«cls.simpleName.toFirstLower»EClass, «cls.simpleName».class, "«cls.simpleName»", «cls.abstract.Q»IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-					// TODO: here should be a list of features
+					«/* TODO: here should be a list of features */»
 «««					initEReference(getUser_Group(), this.getGroup(), this.getGroup_Users(), "group", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 «««					initEAttribute(getUser_Name(), ecorePackage.getEString(), "name", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 				«ENDFOR»
@@ -191,7 +190,7 @@ class ModelPackageTransformation {
 				// Create non-abstract classes and their features
 				«FOR cls : classes.filter[!abstract]»
 					«cls.simpleName.toFirstLower»EClass = createEClass(«cls.toConstantName»);
-					// TODO: here should be a list of features
+					«/* TODO: here should be a list of features */»
 «««					createEReference(userEClass, USER__GROUP);
 «««					createEAttribute(userEClass, USER__NAME);
 				«ENDFOR»

@@ -4,9 +4,7 @@ import java.lang.annotation.Annotation
 import org.eclipse.xtend.lib.macro.declaration.AnnotationTarget
 import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Declaration
-import org.eclipse.xtend.lib.macro.declaration.FieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration
-import org.eclipse.xtend.lib.macro.declaration.MethodDeclaration
 import org.eclipse.xtend.lib.macro.declaration.NamedElement
 import org.eclipse.xtend.lib.macro.declaration.TypeDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
