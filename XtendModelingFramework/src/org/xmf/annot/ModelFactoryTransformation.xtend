@@ -3,30 +3,24 @@ package org.xmf.annot
 import com.google.common.annotations.Beta
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.impl.EFactoryImpl
+import org.eclipse.emf.ecore.plugin.EcorePlugin
 import org.eclipse.xtend.lib.macro.TransformationContext
+import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xmf.utils.AnnotUtils.*
-import org.eclipse.emf.ecore.plugin.EcorePlugin
-import org.eclipse.emf.ecore.EPackage
 
 @Beta
 class ModelFactoryTransformation {
 
-	private extension TransformationContext context
-	
-	private val MutableClassDeclaration packageClass
-	private val MutableClassDeclaration factoryClass
-	
-	new(String factoryName, TransformationContext context) {
-		this.context = context
-		factoryClass = factoryName.findClass
-		packageClass = factoryClass.modelPackageName.findClass
-	}
-	
-	def run(Iterable<MutableClassDeclaration> classes) {
+	/**
+	 * This method orchestrates the content generation.
+	 */
+	def run(Iterable<? extends ClassDeclaration> classes) {
+		addExtendsClass
 		addDocComment
 		addField_eINSTANCE
 		addMethod_init
@@ -35,8 +29,23 @@ class ModelFactoryTransformation {
 		addMethod_create(classes)
 		addMethod_getPackage
 	}
+
+	private extension TransformationContext context
 	
-	def addMethods_createInstance(Iterable<MutableClassDeclaration> classes) {
+	private val ClassDeclaration packageClass
+	private val MutableClassDeclaration factoryClass
+	
+	new(String factoryName, TransformationContext context) {
+		this.context = context
+		factoryClass = factoryName.findClass
+		packageClass = factoryClass.modelPackageName.findClass
+	}
+	
+	private def addExtendsClass() {
+		factoryClass.extendedClass = EFactoryImpl.newTypeReference
+	}
+	
+	private def addMethods_createInstance(Iterable<? extends ClassDeclaration> classes) {
 		for(cls : classes.filter[!abstract]) {
 			factoryClass.addMethod('''create«cls.simpleName»''') [
 				visibility = Visibility.PUBLIC
@@ -48,7 +57,7 @@ class ModelFactoryTransformation {
 	}
 	
 	/** ADD: public TestikPackage getTestikPackage() */
-	def addMethod_getPackage() {
+	private def addMethod_getPackage() {
 		factoryClass.addMethod(packageClass.toGetterName)[
 			visibility = Visibility.PUBLIC
 			returnType = packageClass.newTypeReference
@@ -58,7 +67,7 @@ class ModelFactoryTransformation {
 	}
 	
 	/** ADD: @Override public EObject create(EClass eClass) */
-	def addMethod_create(Iterable<MutableClassDeclaration> classes) {
+	private def addMethod_create(Iterable<? extends ClassDeclaration> classes) {
 		factoryClass.addMethod("create") [
 			visibility = Visibility.PUBLIC
 			returnType = EObject.newTypeReference
@@ -126,14 +135,11 @@ class ModelFactoryTransformation {
 	}
 	
 	private def addDocComment() {
-		factoryClass => [
-			docComment = '''
-				The <b>Factory</b> for the model.
-				It provides a create method for each non-abstract class of the model.
-				@see «packageClass.qualifiedName»
-				@generated'''
-			extendedClass = EFactoryImpl.newTypeReference
-		]
+		factoryClass.docComment = '''
+			The <b>Factory</b> for the model.
+			It provides a create method for each non-abstract class of the model.
+			@see «packageClass.qualifiedName»
+			@generated'''
 	}
 	
 }
