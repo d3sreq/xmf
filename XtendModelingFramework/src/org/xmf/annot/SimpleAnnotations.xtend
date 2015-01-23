@@ -10,12 +10,6 @@ annotation OppositeOf {
 	String value
 }
 
-@Target(TYPE)
-@Retention(SOURCE)
-annotation XPackage {
-	String value // eNS_URI
-}
-
 @Target(METHOD)
 @Retention(SOURCE)
 annotation DerivedAttribute {}

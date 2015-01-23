@@ -7,8 +7,6 @@ import java.util.List
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 import org.eclipse.xtend.lib.macro.Active
-import org.eclipse.xtend.lib.macro.RegisterGlobalsContext
-import org.eclipse.xtend.lib.macro.RegisterGlobalsParticipant
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.TransformationParticipant
 import org.eclipse.xtend.lib.macro.ValidationContext
@@ -32,34 +30,17 @@ import static extension org.xmf.utils.AnnotUtils.*
 // ===============================================================================
 
 @Beta
-@Target(TYPE, PACKAGE)
+@Target(TYPE)
 @Retention(SOURCE)
 @Active(XmfCompilationParticipant)
 annotation XMF {}
 
 @Beta
 class XmfCompilationParticipant implements
-	RegisterGlobalsParticipant<ClassDeclaration>,
-	ValidationParticipant<ClassDeclaration>,
 	TransformationParticipant<MutableClassDeclaration> {
 
-// TODO: add validation: inferred types not allowed for fields and derived properties
-
-
-	override doRegisterGlobals(List<? extends ClassDeclaration> classes, extension RegisterGlobalsContext context) {
-		// register *Factory
-		classes.map[modelFactoryName].toSet.forEach[registerClass]
-	}
-	
-	override doValidate(List<? extends ClassDeclaration> classes, extension ValidationContext context) {
-		// validate that *Package classes exists
-		classes
-			.map[it -> modelPackageName] // find *Package for each class
-			.filter[value == null] // find errors
-			.forEach[key.addError('''Missing class «value»''')] // report errors
-	}
-
 	override doTransform(List<? extends MutableClassDeclaration> classes, extension TransformationContext context) {
+		
 		val extension util = new ContextUtils(context)
 		
 		classes.groupBy[modelFactoryName].forEach[ fname, clist | new ModelFactoryTransformation(fname, context) => [run(clist)] ]
