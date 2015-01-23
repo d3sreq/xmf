@@ -38,15 +38,22 @@ class XmfPackageCompilationParticipant implements
 		
 		// move @XMFPackage to the generated *Package class
 		val XMFPackageType = XMFPackage.findTypeGlobally
-		for(cls: classes) {
+		for(cls : classes) {
 			val clsAnnot = cls.findAnnotation(XMFPackageType)
 			val pkgClass = cls.modelPackageName.findClass
 			val foundPkgAnnot = pkgClass.findAnnotation(XMFPackageType)
 			if(foundPkgAnnot == null) {
 				pkgClass.addAnnotation(clsAnnot)
+				
+				// here is the time to set the primarySourceElement fro *Package and *Factory
+				pkgClass.primarySourceElement = clsAnnot
+				pkgClass.modelFactoryName.findClass.primarySourceElement = clsAnnot
+				 
 			} else {
 				cls.addError('''Multiple @«XMFPackageType.simpleName» declaration in this Java/Xtend package''')
 			}
 		}
+		
+		
 	}
 }
