@@ -29,13 +29,21 @@ It only covers a very small portion of EMF.
 }
 
 @XMF class User extends NamedEntity {
-	List<String> phones = emptyList
+	List<String> phones
 	@OppositeOf("users") Group group
-	@Containment Account userAccount
+	@Contained Account userAccount
+	
+	def someOperation() {
+		...
+	}
+	
+	private def helperMethod() {
+		...
+	}
 }
 
 @XMF class Group extends NamedEntity {
-	@Containment List<User> users
+	@Contained List<User> users
 }
 
 @XMF class Account {
