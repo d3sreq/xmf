@@ -5,8 +5,7 @@ import java.lang.annotation.Retention
 import java.lang.annotation.Target
 import org.eclipse.xtend.lib.macro.Active
 
-@Active(AttributeCompilationParticipant)
+@Beta
 @Target(FIELD)
 @Retention(SOURCE)
-@Beta
 annotation ID {}
