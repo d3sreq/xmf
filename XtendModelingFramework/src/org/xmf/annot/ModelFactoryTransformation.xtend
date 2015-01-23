@@ -48,6 +48,7 @@ class ModelFactoryTransformation {
 	private def addMethods_createInstance(Iterable<? extends ClassDeclaration> classes) {
 		for(cls : classes.filter[!abstract]) {
 			factoryClass.addMethod('''create«cls.simpleName»''') [
+				primarySourceElement = cls
 				visibility = Visibility.PUBLIC
 				returnType = cls.newTypeReference
 				body = '''return new «cls»();'''
@@ -59,6 +60,7 @@ class ModelFactoryTransformation {
 	/** ADD: public TestikPackage getTestikPackage() */
 	private def addMethod_getPackage() {
 		factoryClass.addMethod(packageClass.toGetterName)[
+			primarySourceElement = packageClass
 			visibility = Visibility.PUBLIC
 			returnType = packageClass.newTypeReference
 			docComment = '''@generated'''

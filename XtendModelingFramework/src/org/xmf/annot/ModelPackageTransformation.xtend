@@ -44,7 +44,7 @@ class ModelPackageTransformation {
 	def addMethods_EClassGetters(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
 			packageClass.addMethod(cls.toGetterName) [
-				primarySourceElement = packageClass
+				primarySourceElement = cls
 				visibility = Visibility.PUBLIC
 				returnType = EClass.newTypeReference
 				body = '''return «cls.simpleName.toFirstLower»EClass;'''
@@ -60,7 +60,7 @@ class ModelPackageTransformation {
 	def addFields_PrivateEClassFields(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
 			packageClass.addField('''«cls.simpleName.toFirstLower»EClass''') [
-				primarySourceElement = packageClass
+				primarySourceElement = cls
 				visibility = Visibility.PRIVATE
 				type = EClass.newTypeReference
 				initializer = '''null'''
@@ -74,7 +74,7 @@ class ModelPackageTransformation {
 			// TODO: these are just dummy fieldIds now
 			cls.supportedFeatures.forEach[ field, fieldId |
 				packageClass.addField('''«cls.toConstantName»__«field.toConstantName»''') [
-					primarySourceElement = packageClass
+					primarySourceElement = field
 					visibility = Visibility.PUBLIC
 					static = true
 					final = true
@@ -88,7 +88,7 @@ class ModelPackageTransformation {
 	def addFields_MetaObjectFeatureCounts(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
 			packageClass.addField(cls.toConstantName + "_FEATURE_COUNT") [
-				primarySourceElement = packageClass
+				primarySourceElement = cls
 				visibility = Visibility.PUBLIC
 				static = true
 				final = true
@@ -105,7 +105,7 @@ class ModelPackageTransformation {
 	def addFields_MetaObjectIds(Iterable<MutableClassDeclaration> classes) {
 		classes.forEach[ cls, classId |
 			packageClass.addField(cls.toConstantName) [
-				primarySourceElement = packageClass
+				primarySourceElement = cls
 				visibility = Visibility.PUBLIC
 				static = true
 				final = true
