@@ -3,13 +3,9 @@ package org.xmf.annot
 import java.lang.annotation.Retention
 import java.lang.annotation.Target
 
-@Target(METHOD)
-@Retention(SOURCE)
-annotation Operation {}
-
 @Target(FIELD)
 @Retention(SOURCE)
-annotation Opposite {
+annotation OppositeOf {
 	/** attribute name in the target type */
 	String value
 }
@@ -19,3 +15,7 @@ annotation Opposite {
 annotation XPackage {
 	String value // eNS_URI
 }
+
+@Target(METHOD)
+@Retention(SOURCE)
+annotation DerivedAttribute {}
