@@ -9,6 +9,8 @@ import org.eclipse.xtend.lib.macro.declaration.Visibility
 import org.eclipse.xtend2.lib.StringConcatenationClient
 
 import static extension org.xmf.utils.AnnotUtils.*
+import org.eclipse.xtend.lib.macro.declaration.FieldDeclaration
+import org.eclipse.xtend.lib.macro.declaration.MethodDeclaration
 
 abstract class AbstractFeatureTemplate {
 
@@ -110,7 +112,12 @@ abstract class AbstractFeatureTemplate {
 
 	// useful variables used inside the templates (should not override)
 	final protected def String getDefaultValueConst() {featureRelatedMember.toEDEFAULT}
-	final protected def TypeReference getFeatureType() {featureRelatedMember.toType}
+	final protected def getFeatureType() {
+		switch m : featureRelatedMember {
+			FieldDeclaration : m.type
+			MethodDeclaration : m.returnType
+		}
+	}
 	final protected def TypeReference getFeatureItemType() {getFeatureType.actualTypeArguments.head}
 	final protected def String getFeatureVarName() {featureRelatedMember.simpleName}
 	final protected def String getGetterName() {featureRelatedMember.toGetterName}

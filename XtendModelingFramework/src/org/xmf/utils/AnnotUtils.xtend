@@ -26,12 +26,6 @@ abstract class AnnotUtils {
 		return cls.modelPackageName + "." + cls.toConstantName + "__" + d.toConstantName
 	}
 	
-	@Pure static final dispatch def toTypeName(FieldDeclaration field) {field.type.name}
-	@Pure static final dispatch def toTypeName(MethodDeclaration method) {method.returnType.name}
-
-	@Pure static final dispatch def toType(FieldDeclaration field) {field.type}
-	@Pure static final dispatch def toType(MethodDeclaration method) {method.returnType}
-
 	@Pure
 	static final def String getModelFactoryName(NamedElement element) {
 		val pkg = element.compilationUnit.packageName
