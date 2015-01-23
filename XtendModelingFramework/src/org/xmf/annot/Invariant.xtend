@@ -17,7 +17,7 @@ import static extension org.xmf.utils.AnnotUtils.*
 
 @Target(METHOD)
 @Retention(SOURCE)
-@Active(InvariantCompilationParticipant)
+//@Active(InvariantCompilationParticipant)
 @Beta
 annotation Invariant {
 	/** Error message when violated */
