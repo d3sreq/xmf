@@ -29,8 +29,8 @@ It only covers a very small portion of EMF.
 }
 
 @XMF class User extends NamedEntity {
-	@Attribute List<String> phones = emptyList
-	@Opposite("users") Group group
+	List<String> phones = emptyList
+	@OppositeOf("users") Group group
 	@Containment Account userAccount
 }
 
@@ -39,6 +39,6 @@ It only covers a very small portion of EMF.
 }
 
 @XMF class Account {
-	@Attribute int salary = 0
+	int salary = 0
 }
 ```
