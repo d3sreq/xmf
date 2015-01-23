@@ -22,6 +22,9 @@ abstract class AbstractFeatureTemplate {
 
 	final def void generate(MutableClassDeclaration cls) {
 
+		// cachedValueField represents the attribute specified by the user in the code
+		val cachedValueField = cls.declaredFields.findFirst[simpleName == featureVarName] ?: cls.addField(featureVarName)[]
+
 		// optional
 		if(bodyOfDefaultConst != null) {
 			cls.addField(defaultValueConst) [
@@ -30,7 +33,7 @@ abstract class AbstractFeatureTemplate {
 				final = true
 				type = featureType
 				initializer = bodyOfDefaultConst
-				primarySourceElement = cls
+				primarySourceElement = cachedValueField
 				docComment = '''
 					Generated using {@link «this.class»}
 					@generated'''
@@ -38,8 +41,6 @@ abstract class AbstractFeatureTemplate {
 		}
 
 		// always generated: cached value
-		val cachedValueField = cls.declaredFields.findFirst[simpleName == featureVarName] ?: cls.addField(featureVarName)[]
-		println(cachedValueField)
 		cachedValueField => [
 			visibility = Visibility.PROTECTED
 			type = featureType
@@ -59,7 +60,7 @@ abstract class AbstractFeatureTemplate {
 			visibility = Visibility.PUBLIC
 			returnType = featureType
 			body = bodyOfGetter
-			primarySourceElement = cls
+			primarySourceElement = cachedValueField
 			docComment = '''
 				Generated using {@link «this.class»}
 				@generated'''
@@ -71,7 +72,7 @@ abstract class AbstractFeatureTemplate {
 				visibility = Visibility.PUBLIC
 				addParameter("newValue", featureType)
 				body = bodyOfSetter
-				primarySourceElement = cls
+				primarySourceElement = cachedValueField
 				docComment = '''
 					Generated using {@link «this.class»}
 					@generated'''
@@ -84,7 +85,7 @@ abstract class AbstractFeatureTemplate {
 				visibility = Visibility.PUBLIC
 				returnType = featureType
 				body = bodyOfBasicGetter
-				primarySourceElement = cls
+				primarySourceElement = cachedValueField
 				docComment = '''
 					Generated using {@link «this.class»}
 					@generated'''
@@ -99,7 +100,7 @@ abstract class AbstractFeatureTemplate {
 				addParameter("newValue", featureType)
 				addParameter("msgs", NotificationChain.newTypeReference)
 				body = bodyOfBasicSetter
-				primarySourceElement = cls
+				primarySourceElement = cachedValueField
 				docComment = '''
 					Generated using {@link «this.class»}
 					@generated'''
