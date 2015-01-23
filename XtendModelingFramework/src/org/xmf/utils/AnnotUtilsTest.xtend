@@ -49,8 +49,8 @@ class AnnotUtilsTest {
 		assertEquals("org.mock.something.SomethingFactory", mock.getModelFactoryName)
 	}
 
-	@Test def void test_getModelPackageName() {
+	@Test def void getModelPackageName() {
 		val mock = new MockCompilationUnit
-		assertEquals("org.mock.something.SomethingPackage", mock.modelPackageName)
+		assertEquals("org.mock.something.SomethingPackage", mock.getModelPackageName)
 	}
 }

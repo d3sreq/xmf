@@ -33,26 +33,15 @@ abstract class AnnotUtils {
 	@Pure static final dispatch def toType(MethodDeclaration method) {method.returnType}
 
 	@Pure
-	static final def String getModelFactoryName(AnnotationTarget target) {
-		val pkg = target.getJavaPackageName
+	static final def String getModelFactoryName(NamedElement element) {
+		val pkg = element.compilationUnit.packageName
 		return '''«pkg».«pkg.stringAfterLastDot.toFirstUpper»Factory'''
 	}
 
-	@Pure @Deprecated
-	static final def String getModelPackageName(AnnotationTarget target) {
-		val pkg = target.getJavaPackageName
+	@Pure
+	static final def getModelPackageName(NamedElement element) {
+		val pkg = element.compilationUnit.packageName
 		return '''«pkg».«pkg.stringAfterLastDot.toFirstUpper»Package'''
-	}
-	
-	@Pure @Deprecated
-	static final def getModelPackageName(TypeDeclaration cls) {
-		val packageName = cls.compilationUnit.packageName
-		return '''«packageName».«packageName.toFirstUpper»Package'''
-	}
-
-	@Pure @Deprecated
-	static final private def getJavaPackageName(AnnotationTarget target) {
-		target.compilationUnit.packageName
 	}
 	
 	@Pure
@@ -60,10 +49,9 @@ abstract class AnnotUtils {
 		javaPackageName.replaceFirst(".*\\.([^.]+)$", "$1")
 	}
 
-
 	@Pure
-	static final def getValidatorName(TypeDeclaration classDeclaration) {
-		classDeclaration.qualifiedName + "Validator"
+	static final def getValidatorName(TypeDeclaration declaration) {
+		declaration.qualifiedName + "Validator"
 	}
 	
 	@Pure
