@@ -43,14 +43,14 @@ class ModelPackageTransformation {
 	
 	def addMethods_EClassGetters(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
-			packageClass.addMethod(cls.simpleName.toGetterName) [
+			packageClass.addMethod(cls.toGetterName) [
 				primarySourceElement = packageClass
 				visibility = Visibility.PUBLIC
 				returnType = EClass.newTypeReference
 				body = '''return «cls.simpleName.toFirstLower»EClass;'''
 				docComment = '''
-					Returns the meta object for class '{@link «cls.qualifiedName» <em>«cls.simpleName.toHumanReadable»</em>}'.
-					@return the meta object for class '<em>«cls.simpleName.toHumanReadable»</em>'.
+					Returns the meta object for class '{@link «cls.qualifiedName» <em>«cls.toHumanReadable»</em>}'.
+					@return the meta object for class '<em>«cls.toHumanReadable»</em>'.
 					@see «cls.qualifiedName»
 					@generated'''
 			]
@@ -71,22 +71,23 @@ class ModelPackageTransformation {
 	
 	def addFields_MetaObjectFeatures(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
-			for(field : cls.supportedFeatures) {
-				packageClass.addField('''«cls.simpleName.toConstantName»__«field.simpleName.toConstantName»''') [
+			// TODO: these are just dummy fieldIds now
+			cls.supportedFeatures.forEach[ field, fieldId |
+				packageClass.addField('''«cls.toConstantName»__«field.toConstantName»''') [
 					primarySourceElement = packageClass
 					visibility = Visibility.PUBLIC
 					static = true
 					final = true
 					type = primitiveInt
-					initializer = '''0 /* TODO */'''
+					initializer = ''' «fieldId» /* TODO */'''
 				]
-			}
+			]
 		}
 	}
 	
 	def addFields_MetaObjectFeatureCounts(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
-			packageClass.addField(cls.simpleName.toConstantName + "_FEATURE_COUNT") [
+			packageClass.addField(cls.toConstantName + "_FEATURE_COUNT") [
 				primarySourceElement = packageClass
 				visibility = Visibility.PUBLIC
 				static = true
@@ -94,7 +95,7 @@ class ModelPackageTransformation {
 				type = primitiveInt
 				initializer = '''0 /* TODO */'''
 				docComment = '''
-					The number of structural features of the '<em>«cls.simpleName.toHumanReadable»</em>' class.
+					The number of structural features of the '<em>«cls.toHumanReadable»</em>' class.
 					@generated
 					@ordered'''
 			]
@@ -103,7 +104,7 @@ class ModelPackageTransformation {
 	
 	def addFields_MetaObjectIds(Iterable<MutableClassDeclaration> classes) {
 		classes.forEach[ cls, classId |
-			packageClass.addField(cls.simpleName.toConstantName) [
+			packageClass.addField(cls.toConstantName) [
 				primarySourceElement = packageClass
 				visibility = Visibility.PUBLIC
 				static = true
@@ -111,9 +112,9 @@ class ModelPackageTransformation {
 				type = primitiveInt
 				initializer = '''«classId»'''
 				docComment = '''
-					The meta object id for the '{@link «cls.qualifiedName» <em>«cls.simpleName.toHumanReadable»</em>}' class.
+					The meta object id for the '{@link «cls.qualifiedName» <em>«cls.toHumanReadable»</em>}' class.
 					@see «cls.qualifiedName»
-					@see «packageClass.qualifiedName»#«cls.simpleName.toGetterName»()
+					@see «packageClass.qualifiedName»#«cls.toGetterName»()
 					@generated'''
 			]
 			
@@ -148,6 +149,7 @@ class ModelPackageTransformation {
 				// Initialize classes and features; add operations and parameters
 				«FOR cls : classes»
 					initEClass(«cls.simpleName.toFirstLower»EClass, «cls.simpleName».class, "«cls.simpleName»", «cls.abstract.Q»IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+					// TODO: here should be a list of features
 «««					initEReference(getUser_Group(), this.getGroup(), this.getGroup_Users(), "group", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 «««					initEAttribute(getUser_Name(), ecorePackage.getEString(), "name", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 				«ENDFOR»
@@ -187,8 +189,9 @@ class ModelPackageTransformation {
 				isCreated = true;
 				
 				// Create non-abstract classes and their features
-				«FOR cname : classes.filter[!abstract].map[simpleName]»
-					«cname.toFirstLower»EClass = createEClass(«cname.toConstantName»);
+				«FOR cls : classes.filter[!abstract]»
+					«cls.simpleName.toFirstLower»EClass = createEClass(«cls.toConstantName»);
+					// TODO: here should be a list of features
 «««					createEReference(userEClass, USER__GROUP);
 «««					createEAttribute(userEClass, USER__NAME);
 				«ENDFOR»
@@ -209,7 +212,7 @@ class ModelPackageTransformation {
 	
 	/** ADD: get...Factory() {...} */
 	def addMethod_getFactory() {
-		packageClass.addMethod(factoryClass.simpleName.toGetterName) [
+		packageClass.addMethod(factoryClass.toGetterName) [
 			primarySourceElement = packageClass
 			visibility = Visibility.PUBLIC
 			returnType = factoryClass.newTypeReference
@@ -217,7 +220,7 @@ class ModelPackageTransformation {
 				Returns the factory that creates the instances of the model.
 				@return the factory that creates the instances of the model.
 				@generated'''
-			body = '''return («factoryClass.simpleName») getEFactoryInstance();'''
+			body = '''return («factoryClass») getEFactoryInstance();'''
 		]
 	}
 	
@@ -232,7 +235,7 @@ class ModelPackageTransformation {
 				Creates, registers, and initializes the <b>Package</b> for this model,
 				and for any others upon which it depends.
 				
-				<p>This method is used to initialize {@link TestikPackage#eINSTANCE} when that field is accessed.
+				<p>This method is used to initialize {@link «packageClass.qualifiedName»#eINSTANCE} when that field is accessed.
 				Clients should not invoke it directly. Instead, they should simply access that field to obtain the package.
 				@see #eNS_URI
 				@see #createPackageContents()
@@ -283,7 +286,6 @@ class ModelPackageTransformation {
 			type = string
 			docComment = '''
 				The package name.
-				Generated from @Package( name=... )
 				@generated'''
 			initializer = '''"«eNAME»"'''
 		]
@@ -297,7 +299,6 @@ class ModelPackageTransformation {
 			type = string
 			docComment = '''
 				The package namespace URI.
-				Generated from @Package( uri=... )
 				@generated'''
 			initializer = '''"«eNS_URI»"'''
 		]

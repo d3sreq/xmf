@@ -9,6 +9,8 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xmf.utils.AnnotUtils.*
+import org.eclipse.emf.ecore.plugin.EcorePlugin
+import org.eclipse.emf.ecore.EPackage
 
 @Beta
 class ModelFactoryTransformation {
@@ -39,7 +41,7 @@ class ModelFactoryTransformation {
 			factoryClass.addMethod('''create«cls.simpleName»''') [
 				visibility = Visibility.PUBLIC
 				returnType = cls.newTypeReference
-				body = '''return new «cls.simpleName»();'''
+				body = '''return new «cls»();'''
 				docComment = '''@generated'''
 			]
 		}
@@ -47,11 +49,11 @@ class ModelFactoryTransformation {
 	
 	/** ADD: public TestikPackage getTestikPackage() */
 	def addMethod_getPackage() {
-		factoryClass.addMethod(packageClass.simpleName.toGetterName)[
+		factoryClass.addMethod(packageClass.toGetterName)[
 			visibility = Visibility.PUBLIC
 			returnType = packageClass.newTypeReference
 			docComment = '''@generated'''
-			body = '''return («packageClass.simpleName») getEPackage();'''
+			body = '''return («packageClass») getEPackage();'''
 		]
 	}
 	
@@ -66,7 +68,7 @@ class ModelFactoryTransformation {
 			body = '''
 				switch (eClass.getClassifierID()) {
 					«FOR cls : classes.filter[!abstract].sortBy[simpleName]»
-						case «packageClass.simpleName».«cls.simpleName.toConstantName»: return create«cls.simpleName»();
+						case «packageClass».«cls.toConstantName»: return create«cls»();
 					«ENDFOR»
 				}
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
@@ -96,15 +98,15 @@ class ModelFactoryTransformation {
 				@generated'''
 			body = '''
 				try {
-					«factoryClass.simpleName» the«factoryClass.simpleName» = («factoryClass.simpleName») org.eclipse.emf.ecore.EPackage.Registry.INSTANCE.getEFactory(«packageClass.simpleName».eNS_URI);
-					if (the«factoryClass.simpleName» != null) {
-						return the«factoryClass.simpleName»;
+					«factoryClass» the«factoryClass» = («factoryClass») «EPackage.Registry».INSTANCE.getEFactory(«packageClass».eNS_URI);
+					if (the«factoryClass» != null) {
+						return the«factoryClass»;
 					}
 				}
 				catch (Exception exception) {
-					org.eclipse.emf.ecore.plugin.EcorePlugin.INSTANCE.log(exception);
+					«EcorePlugin».INSTANCE.log(exception);
 				}
-				return new «factoryClass.simpleName»();
+				return new «factoryClass»();
 			'''
 		]
 	}
