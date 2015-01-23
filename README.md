@@ -13,6 +13,9 @@ It only covers a very small portion of EMF.
 ## Example meta model:
 
 ```Xtend
+
+@XMFPackage("http://some/eNS_URI")
+
 @XMF abstract class NamedEntity {
 
 	@ID String name
