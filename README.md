@@ -47,6 +47,9 @@ It only covers a very small portion of EMF.
 
 @XMF class Group extends NamedEntity {
 	@Contained List<User> users
+	@DerivedAttribute def paidUsers() {
+		users.filter[salary > 0]
+	}
 }
 
 @XMF class Account {
