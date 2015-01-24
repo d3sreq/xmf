@@ -1,4 +1,4 @@
-package org.xmf.annot.emf.api
+package org.xmf.features.api
 
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference

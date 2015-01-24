@@ -1,4 +1,4 @@
-package org.xmf.annot
+package org.xmf.annot.compile
 
 import com.google.common.annotations.Beta
 import org.eclipse.emf.ecore.EClass
@@ -6,9 +6,9 @@ import org.eclipse.emf.ecore.impl.EPackageImpl
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
+import org.xmf.features.FeatureFactory
 
 import static extension org.xmf.utils.AnnotUtils.*
-import org.xmf.annot.emf.FeatureFactory
 
 @Beta
 class ModelPackageTransformation {

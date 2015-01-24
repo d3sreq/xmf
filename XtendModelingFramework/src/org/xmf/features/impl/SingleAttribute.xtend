@@ -1,4 +1,4 @@
-package org.xmf.annot.emf.impl
+package org.xmf.features.impl
 
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration

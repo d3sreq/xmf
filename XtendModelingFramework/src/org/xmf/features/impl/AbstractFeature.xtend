@@ -1,10 +1,10 @@
-package org.xmf.annot.emf.impl
+package org.xmf.features.impl
 
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.FieldDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MethodDeclaration
-import org.xmf.annot.emf.api.Feature
+import org.xmf.features.api.Feature
 
 import static extension org.xmf.utils.AnnotUtils.*
 

@@ -1,20 +1,20 @@
-package org.xmf.annot.emf
+package org.xmf.features
 
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeDeclaration
 import org.xmf.annot.DerivedAttribute
-import org.xmf.annot.emf.api.Feature
-import org.xmf.annot.emf.impl.ListAttribute
-import org.xmf.annot.emf.impl.ListContainment
-import org.xmf.annot.emf.impl.ListReference
-import org.xmf.annot.emf.impl.SingleAttribute
-import org.xmf.annot.emf.impl.SingleContainment
-import org.xmf.annot.emf.impl.SingleReference
+import org.xmf.features.api.Feature
+import org.xmf.features.impl.DerivedFeature
+import org.xmf.features.impl.ListAttribute
+import org.xmf.features.impl.ListContainment
+import org.xmf.features.impl.ListReference
+import org.xmf.features.impl.SingleAttribute
+import org.xmf.features.impl.SingleContainment
+import org.xmf.features.impl.SingleReference
 import org.xmf.utils.ContextUtils
 
 import static extension org.xmf.utils.AnnotUtils.*
-import org.xmf.annot.emf.impl.DerivedFeature
 
 final class FeatureFactory {
 	

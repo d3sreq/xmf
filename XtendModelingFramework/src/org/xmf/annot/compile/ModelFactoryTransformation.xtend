@@ -1,4 +1,4 @@
-package org.xmf.annot
+package org.xmf.annot.compile
 
 import com.google.common.annotations.Beta
 import org.eclipse.emf.ecore.EClass

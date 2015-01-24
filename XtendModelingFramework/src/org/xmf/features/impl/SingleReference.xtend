@@ -1,4 +1,4 @@
-package org.xmf.annot.emf.impl
+package org.xmf.features.impl
 
 import org.eclipse.emf.ecore.InternalEObject
 import org.eclipse.xtend.lib.macro.TransformationContext

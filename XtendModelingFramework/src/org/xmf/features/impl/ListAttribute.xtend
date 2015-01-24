@@ -1,4 +1,4 @@
-package org.xmf.annot.emf.impl
+package org.xmf.features.impl
 
 import java.util.Collection
 import org.eclipse.emf.ecore.util.BasicInternalEList

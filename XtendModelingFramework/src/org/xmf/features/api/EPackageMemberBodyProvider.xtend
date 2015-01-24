@@ -1,4 +1,4 @@
-package org.xmf.annot.emf.api
+package org.xmf.features.api
 
 import org.eclipse.xtend2.lib.StringConcatenationClient
 

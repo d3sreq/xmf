@@ -9,7 +9,3 @@ annotation OppositeOf {
 	/** attribute name in the target type */
 	String value
 }
-
-@Target(METHOD)
-@Retention(SOURCE)
-annotation DerivedAttribute {}
