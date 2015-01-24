@@ -1,6 +1,7 @@
 package org.xmf.utils
 
 import org.eclipse.emf.common.util.EList
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.FieldDeclaration
@@ -9,7 +10,6 @@ import org.eclipse.xtend.lib.macro.declaration.MethodDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
 import org.xmf.annot.Contained
 import org.xmf.annot.DerivedAttribute
-import org.xmf.annot.XMF
 
 import static extension org.xmf.utils.AnnotUtils.*
 
@@ -31,7 +31,7 @@ class ContextUtils {
 	 * TRUE  : EReference
 	 * FALSE : EAttribute
 	 */
-	def boolean isReferenceToModelElement(MemberDeclaration member) {
+	def boolean isRefToModelElement(MemberDeclaration member) {
 		val typeRef = switch member {
 			FieldDeclaration : member.type
 			MethodDeclaration : member.returnType
@@ -41,8 +41,8 @@ class ContextUtils {
 		if(typeRef.inferred)
 			return false
 		
-		val typeToCheck = (typeRef.actualTypeArguments.head ?: typeRef).name.findClass
-		return typeToCheck != null && typeToCheck.hasAnnotation(XMF)
+		// TODO: this should only by a temporary solution
+		return EObject.newTypeReference.isAssignableFrom(typeRef)
 	}
 	
 	/**
