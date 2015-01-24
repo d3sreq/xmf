@@ -4,22 +4,15 @@ import com.google.common.annotations.Beta
 import java.lang.annotation.Retention
 import java.lang.annotation.Target
 import java.util.List
+import org.eclipse.emf.common.notify.NotificationChain
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl
 import org.eclipse.xtend.lib.macro.Active
 import org.eclipse.xtend.lib.macro.TransformationContext
 import org.eclipse.xtend.lib.macro.TransformationParticipant
-import org.eclipse.xtend.lib.macro.ValidationContext
-import org.eclipse.xtend.lib.macro.ValidationParticipant
-import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
-import org.xmf.annot.emf.ListAttributeFeatureTemplate
-import org.xmf.annot.emf.ListContainmentFeatureTemplate
-import org.xmf.annot.emf.ListReferenceFeatureTemplate
-import org.xmf.annot.emf.SingleAttributeFeatureTemplate
-import org.xmf.annot.emf.SingleContainmentFeatureTemplate
-import org.xmf.annot.emf.SingleReferenceFeatureTemplate
+import org.xmf.annot.emf.FeatureFactory
 import org.xmf.utils.ContextUtils
 
 import static extension org.xmf.utils.AnnotUtils.*
@@ -42,41 +35,144 @@ class XmfCompilationParticipant implements
 	override doTransform(List<? extends MutableClassDeclaration> classes, extension TransformationContext context) {
 		
 		val extension util = new ContextUtils(context)
+		val featureFactory = new FeatureFactory(context)
+		val eObjContainerType = MinimalEObjectImpl.Container.newTypeReference
 		
 		classes.groupBy[modelFactoryName].forEach[ fname, clist | new ModelFactoryTransformation(fname, context) => [run(clist)] ]
 		classes.groupBy[modelPackageName].forEach[ pname, clist | new ModelPackageTransformation(pname, context) => [run(clist)] ]
+		
+		for(cls : classes) {
 
-		// ADD: extends MinimalEObjectImpl.Container
-		for(cls : classes) {
-			// TODO: replace string comparison
-			if(cls.extendedClass.name == Object.name) {
-				cls.extendedClass = MinimalEObjectImpl.Container.newTypeReference
+			// ADD: extends MinimalEObjectImpl.Container
+			if( ! cls.isAssignableFrom(eObjContainerType.type)) {
+				cls.extendedClass = eObjContainerType
 			}
-		}
-		
-		// ADD: docComment
-		classes.forEach[addDocCommentToClass(context)]
-		
-		// ADD: getters, setters and similar method for all features
-		for(cls : classes) {
-			val templates = cls.supportedFeatures.filter[!isDerived].map[
-				switch it {
-					case  isListType &&  isContainment				: new ListContainmentFeatureTemplate(it, context)
-					case  isListType && !isReferenceToModelElement	: new ListAttributeFeatureTemplate(it, context)
-					case  isListType &&  isReferenceToModelElement	: new ListReferenceFeatureTemplate(it, context)
-					case !isListType &&  isContainment				: new SingleContainmentFeatureTemplate(it, context)
-					case !isListType && !isReferenceToModelElement	: new SingleAttributeFeatureTemplate(it, context)
-					case !isListType &&  isReferenceToModelElement	: new SingleReferenceFeatureTemplate(it, context)
-					default: {
-						addWarning(it, '''unknown specification of feature: «cls.simpleName».«it.simpleName»''')
-						null
-					}
+			
+			// remove unnecessary annotations
+			cls.annotations.filter[
+				switch annotationTypeDeclaration {
+					case XMF.newAnnotationReference.annotationTypeDeclaration: true
+					case XMFPackage.newAnnotationReference.annotationTypeDeclaration : true
+					default: false
 				}
-			].filterNull
+			].forEach[cls.removeAnnotation(it)]
 			
-			// generate getters, setters,...
-			templates.forEach[generate(cls)]
+			// ADD: protected EClass eStaticClass() {...}
+			cls.addMethod("eStaticClass") [
+				primarySourceElement = cls
+				visibility = Visibility.PROTECTED
+				returnType = EClass.newTypeReference
+				addAnnotation(Override.newAnnotationReference)
+				docComment = '''@generated'''
+				body = '''return «cls.toModelPackage».eINSTANCE.«cls.toGetterName»();'''
+			]
+
+			val features = featureFactory.getAllFeatures(cls)
 			
+			// ADD: listing all features in the docComment of a class
+			cls.docComment = '''
+				A representation of the model object '<em><b>«cls.toHumanReadable»</b></em>'.
+				<p>
+				The following features are supported:
+				«FOR feature : features BEFORE "<ul>" AFTER "</ul>"»
+					<li>{@link «cls.qualifiedName»#«feature.getterName» <em>«feature.humanReadableName»</em>}</li>
+				«ENDFOR»
+				</p>
+				@see «cls.toModelPackage.qualifiedName»#«cls.toGetterName»()
+				@model kind="class"
+				@generated'''
+			
+			// generating code for each feature
+			for(feature : features) {
+				
+				if(feature.cachedValueInitializer != null) {
+			
+					// cachedValueField represents the attribute specified by the user in the code
+					val cachedValueField = cls.declaredFields.findFirst[it == feature.sourceMemberDeclaration]
+						?: cls.addField(feature.featureVarName)[]
+						
+					cachedValueField => [
+						visibility = Visibility.PROTECTED
+						type = feature.featureType
+						primarySourceElement = cls
+						docComment = '''
+							The cached value of the '{@link #«feature.getterName»() <em>«feature.featureType»</em>}' containment reference.
+							@see #«feature.getterName»()
+							Generated using {@link «feature.class»}
+							@generated'''
+							
+							initializer = feature.cachedValueInitializer
+					]
+
+					// always generate getter together with the cavh
+					cls.addMethod(feature.getterName) [
+						visibility = Visibility.PUBLIC
+						returnType = feature.featureType
+						body = feature.getterMethod
+						primarySourceElement = feature.sourceMemberDeclaration
+						docComment = '''
+							Generated using {@link «feature.class»}
+							@generated'''
+					]
+				}
+									
+				// optional
+				if(feature.defaultValueInitializer != null) {
+					cls.addField(feature.defaultValueConstantName) [
+						visibility = Visibility.PROTECTED
+						static = true
+						final = true
+						type = feature.featureType
+						initializer = feature.defaultValueInitializer
+						primarySourceElement = feature.sourceMemberDeclaration
+						docComment = '''
+							Generated using {@link «feature.class»}
+							@generated'''
+					]
+				}
+				
+				// optional
+				if(feature.setterMethod != null) {
+					cls.addMethod(feature.setterName) [
+						visibility = Visibility.PUBLIC
+						addParameter("newValue", feature.featureType)
+						body = feature.setterMethod
+						primarySourceElement = feature.sourceMemberDeclaration
+						docComment = '''
+							Generated using {@link «feature.class»}
+							@generated'''
+					]
+				}
+				
+				// optional
+				if(feature.basicGetterMethod != null) {
+					cls.addMethod(feature.basicGetterName) [
+						visibility = Visibility.PUBLIC
+						returnType = feature.featureType
+						body = feature.basicGetterMethod
+						primarySourceElement = feature.sourceMemberDeclaration
+						docComment = '''
+							Generated using {@link «feature.class»}
+							@generated'''
+					]
+				}
+
+				// optional
+				if(feature.basicSetterMethod != null) {
+					cls.addMethod(feature.basicSetterName) [
+						visibility = Visibility.PUBLIC
+						returnType = NotificationChain.newTypeReference
+						addParameter("newValue", feature.featureType)
+						addParameter("msgs", NotificationChain.newTypeReference)
+						body = feature.basicSetterMethod
+						primarySourceElement = feature.sourceMemberDeclaration
+						docComment = '''
+							Generated using {@link «feature.class»}
+							@generated'''
+					]
+				}
+			}
+
 			// ADD: @Override public void eGet(int featureID, boolean resolve, boolean coreType)
 			cls.addMethod("eGet") [
 				primarySourceElement = cls
@@ -89,9 +185,9 @@ class XmfCompilationParticipant implements
 				docComment = '''@generated'''
 				body = '''
 					switch (featureID) {
-						«FOR feature: templates »
+						«FOR feature : features »
 							case «feature.globalFeatureIdConst»:
-								«feature.caseBodyForEGet»
+								«feature.eGet»
 						«ENDFOR»
 						}
 					return super.eGet(featureID, resolve, coreType);
@@ -108,9 +204,9 @@ class XmfCompilationParticipant implements
 				docComment = '''@generated'''
 				body = '''
 					switch (featureID) {
-						«FOR feature : templates»
+						«FOR feature : features»
 							case «feature.globalFeatureIdConst»:
-								«feature.caseBodyForESet»
+								«feature.eSet»
 						«ENDFOR»
 					}
 					super.eSet(featureID, newValue);
@@ -126,9 +222,9 @@ class XmfCompilationParticipant implements
 				docComment = '''@generated'''
 				body = '''
 					switch (featureID) {
-						«FOR feature : templates»
+						«FOR feature : features»
 							case «feature.globalFeatureIdConst»:
-								«feature.caseBodyForEUnset»
+								«feature.eUnset»
 						«ENDFOR»
 					}
 					super.eUnset(featureID);
@@ -145,41 +241,16 @@ class XmfCompilationParticipant implements
 				docComment = '''@generated'''
 				body = '''
 					switch (featureID) {
-						«FOR feature : templates»
+						«FOR feature : features»
 							case «feature.globalFeatureIdConst»:
-								«feature.caseBodyForEIsSet»
+								«feature.eIsSet»
 						«ENDFOR»
 					}
 					return super.eIsSet(featureID);
 				'''
 			]
 		}
-
-		// ADD: protected EClass eStaticClass() {...}
-		for(cls : classes) {
-			cls.addMethod("eStaticClass") [
-				primarySourceElement = cls
-				visibility = Visibility.PROTECTED
-				returnType = EClass.newTypeReference
-				addAnnotation(Override.newAnnotationReference)
-				docComment = '''@generated'''
-				body = '''return «cls.toModelPackage».eINSTANCE.«cls.toGetterName»();'''
-			]
-		}
 	}
 	
-	private def addDocCommentToClass(MutableClassDeclaration cls, extension TransformationContext context) {
-		val extension util = new ContextUtils(context)
-		cls.docComment = '''
-			A representation of the model object '<em><b>«cls.toHumanReadable»</b></em>'.
-			<p>
-			The following features are supported:
-			«FOR feature : cls.supportedFeatures BEFORE "<ul>" AFTER "</ul>"»
-				<li>{@link «cls.qualifiedName»#«feature.toGetterName» <em>«feature.toHumanReadable»</em>}</li>
-			«ENDFOR»
-			</p>
-			@see «cls.toModelPackage.qualifiedName»#«cls.toGetterName»()
-			@model kind="class"
-			@generated'''
-	}
+	
 }

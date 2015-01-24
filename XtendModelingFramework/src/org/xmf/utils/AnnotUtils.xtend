@@ -2,13 +2,11 @@ package org.xmf.utils
 
 import java.lang.annotation.Annotation
 import org.eclipse.xtend.lib.macro.declaration.AnnotationTarget
-import org.eclipse.xtend.lib.macro.declaration.ClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Declaration
 import org.eclipse.xtend.lib.macro.declaration.MemberDeclaration
 import org.eclipse.xtend.lib.macro.declaration.NamedElement
 import org.eclipse.xtend.lib.macro.declaration.TypeDeclaration
 import org.eclipse.xtend.lib.macro.declaration.TypeReference
-import org.xmf.annot.DerivedAttribute
 
 abstract class AnnotUtils {
 
@@ -89,11 +87,4 @@ abstract class AnnotUtils {
 	static final def getMembersAnnotatedBy(TypeDeclaration type, Class<? extends Annotation> annotToFind) {
 		type.declaredMembers.filter[hasAnnotation(annotToFind)]
 	}
-	
-	@Pure
-	static final def getSupportedFeatures(ClassDeclaration cls) {
-		return	cls.declaredFields +
-				cls.declaredMethods.filter[hasAnnotation(DerivedAttribute)]
-	}
-	
 }

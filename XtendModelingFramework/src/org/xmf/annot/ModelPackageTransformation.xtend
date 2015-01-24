@@ -8,6 +8,7 @@ import org.eclipse.xtend.lib.macro.declaration.MutableClassDeclaration
 import org.eclipse.xtend.lib.macro.declaration.Visibility
 
 import static extension org.xmf.utils.AnnotUtils.*
+import org.xmf.annot.emf.FeatureFactory
 
 @Beta
 class ModelPackageTransformation {
@@ -15,11 +16,15 @@ class ModelPackageTransformation {
 
 	private val MutableClassDeclaration packageClass
 	private val MutableClassDeclaration factoryClass
+
+	private val FeatureFactory featureFactory
+
 	
 	new(String packageName, TransformationContext context) {
 		this.context = context
 		this.packageClass = packageName.findClass
 		this.factoryClass = packageClass.modelFactoryName.findClass
+		featureFactory = new FeatureFactory(context)
 	}
 	
 	def run(Iterable<MutableClassDeclaration> classes) {
@@ -72,9 +77,10 @@ class ModelPackageTransformation {
 	def addFields_MetaObjectFeatures(Iterable<MutableClassDeclaration> classes) {
 		for(cls : classes) {
 			// TODO: these are just dummy fieldIds now
-			cls.supportedFeatures.forEach[ field, fieldId |
-				packageClass.addField('''«cls.toConstantName»__«field.toConstantName»''') [
-					primarySourceElement = field
+			featureFactory.getAllFeatures(cls).forEach[ feature, fieldId |
+				val fieldName = feature.getGlobalFeatureIdConst.getStringAfterLastDot 
+				packageClass.addField(fieldName) [
+					primarySourceElement = feature.getSourceMemberDeclaration
 					visibility = Visibility.PUBLIC
 					static = true
 					final = true
@@ -148,7 +154,9 @@ class ModelPackageTransformation {
 				// Initialize classes and features; add operations and parameters
 				«FOR cls : classes»
 					initEClass(«cls.simpleName.toFirstLower»EClass, «cls.simpleName».class, "«cls.simpleName»", «cls.abstract.Q»IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-					«/* TODO: here should be a list of features */»
+«««					«FOR feature  : cls.supportedFeatures»
+«««						«feature.initEAttributeOrEReference»(getUser_Group(), this.getGroup(), this.getGroup_Users(), "group", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+«««					«ENDFOR»
 «««					initEReference(getUser_Group(), this.getGroup(), this.getGroup_Users(), "group", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 «««					initEAttribute(getUser_Name(), ecorePackage.getEString(), "name", null, 0, 1, User.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 				«ENDFOR»
