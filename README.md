@@ -10,6 +10,19 @@ Using Xtend active annotations, the following code is converted automagically in
 This project is currently just a proof-of-concept.
 It only covers a very small portion of EMF.
 
+## Currently supported:
+- `@XMFPackage` creates `EPackage` + `EFactory` classes
+- `@XMF` for classes of the meta model
+- inheritance using classes and abstract classes (currently no interfaces, but it will change soon)
+- `@Contained` for containment relation
+- `@Invariant` marks validation methods. XMF will automatically create the Validator class as necessary
+- Non-XMF datatypes are treated as attributes
+- XMF datatype is treated as a reference
+- `@DerivedAttribute` for attributes whose value is computed in a method
+- `List<T>` is treated as a attribute/reference of cardinality `0..*` and mapped to `EList<T>`
+- public methods are treated as `EOperations`
+- non-public method are ignored
+
 ## Example meta model:
 
 ```Xtend
